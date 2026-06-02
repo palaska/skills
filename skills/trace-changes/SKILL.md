@@ -27,5 +27,5 @@ For each step:
 Rules for the trace:
 - Include steps in unchanged code if they're part of the flow. Mark changed steps with **(changed)** so the user knows where to focus.
 - Keep sentences short. Plain language. No filler.
-- If the flow branches, fans out, or involves async/events, draw a small mermaid diagram before the steps.
+- If the flow branches, fans out, or involves async/events, draw a small ASCII diagram before the steps.
 - One trace per distinct flow. If the change touches multiple unrelated flows, do separate Overview + Trace sections for each.
