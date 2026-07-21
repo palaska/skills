@@ -2,6 +2,30 @@
 
 My agent skills that I use every day to do real engineering - not vibe coding.
 
+## Local Installation
+
+Link every skill in this repo into both Claude and Codex:
+
+```sh
+scripts/link-skills.sh
+```
+
+The script links skills into:
+
+- Claude: `~/.claude/skills`
+- Codex: `~/.agents/skills`
+
+To target only one agent:
+
+```sh
+scripts/link-skills.sh claude
+scripts/link-skills.sh codex
+```
+
+For reusable Codex distribution, this repo is also a skill-only plugin. The
+plugin manifest is at `.codex-plugin/plugin.json` and points Codex at
+`./skills/`.
+
 ## Planning & Design
 
 These skills help you think through problems before writing code.

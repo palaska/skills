@@ -1,0 +1,39 @@
+{
+  "name": "palaska-skills",
+  "version": "0.1.0",
+  "description": "Engineering workflow skills for planning, TDD, triage, architecture, and writing.",
+  "author": {
+    "name": "Baris Palaska",
+    "url": "https://github.com/palaska"
+  },
+  "homepage": "https://github.com/palaska/skills",
+  "repository": "https://github.com/palaska/skills",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "skills",
+    "engineering",
+    "tdd",
+    "architecture",
+    "triage"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Palaska Skills",
+    "shortDescription": "Engineering workflow skills for Codex",
+    "longDescription": "Reusable engineering skills for planning, TDD, issue triage, architecture improvement, writing, and repository maintenance workflows.",
+    "developerName": "Baris Palaska",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/palaska/skills",
+    "defaultPrompt": [
+      "Use TDD to implement this change.",
+      "Triage this bug and write a fix plan.",
+      "Improve this codebase architecture."
+    ],
+    "brandColor": "#111111"
+  }
+}
