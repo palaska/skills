@@ -8,7 +8,7 @@ description: Always active when coding. Triggers whenever implementation work is
 Use two explicit roles:
 
 - **Intelligent model:** the model running the current session. It may be Claude or Codex, and may be any suitable model. Use it for judgment, planning, design intent, investigation, review, and validation.
-- **Worker model:** one or more Codex CLI processes running `gpt-5.6-luna` with high reasoning effort. Use them for implementation volume.
+- **Worker model:** one or more Codex CLI processes running `gpt-5.6-sol` with high reasoning effort. Use them for implementation volume.
 
 Do not infer the intelligent model from its provider or model name. “Here” always means the current session. Do not dispatch implementation to an unspecified or default worker model.
 
@@ -38,7 +38,7 @@ Do not infer the intelligent model from its provider or model name. “Here” a
 4. **Dispatch to every pinned worker.** Run each eligible unit concurrently using the exact model and effort settings below:
 
    ```bash
-   codex exec --cd <worker-worktree> -m gpt-5.6-luna -c 'model_reasoning_effort="high"' "/goal <one-line objective; details in SPEC.md>"
+   codex exec --cd <worker-worktree> -m gpt-5.6-sol -c 'model_reasoning_effort="high"' "/goal <one-line objective; details in SPEC.md>"
    ```
 
    Run workers in the background and continue useful planning, investigation, or validation in the intelligent-model session. Do not omit `-m` or the reasoning-effort override, and do not silently fall back to another model.
@@ -77,7 +77,7 @@ Struggle must be observed, not predicted. Always dispatch first when implementat
 | Thought | Reality |
 |---------|---------|
 | “The current model is Claude, so this is a Fable session.” | The current model may be any Claude or Codex model. Route by role, not vendor. |
-| “This is a different Codex model, so the worker settings are close enough.” | The worker is always `gpt-5.6-luna` with `model_reasoning_effort="high"`. Pin both explicitly. |
+| “This is a different Codex model, so the worker settings are close enough.” | The worker is always `gpt-5.6-sol` with `model_reasoning_effort="high"`. Pin both explicitly. |
 | “Both units are independent enough; they can share a worktree.” | Every concurrent worker gets its own branch and worktree. Shared worktrees create races and unreliable diffs. |
 | “Frontend is design-critical, so I’ll code it here.” | The intelligent model’s taste belongs in the spec and validation loop; dispatch implementation. |
 | “This part is too hard for the worker.” | Predicted struggle is not observed struggle. Specify it precisely and dispatch first. |
