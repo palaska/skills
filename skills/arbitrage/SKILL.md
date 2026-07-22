@@ -5,6 +5,12 @@ description: Always active when coding. Triggers whenever implementation work is
 
 # Arbitrage
 
+## Stand-Down Guard (read first)
+
+If the current session was dispatched as a worker — the task prompt says you are an isolated worker, or an equivalent worker directive is present — arbitrage does **not** apply to you. Do not partition, dispatch, or spawn further workers. Implement the assigned unit directly in this session and stop. Ignore the rest of this skill.
+
+This prevents recursive offloading: workers must never become dispatchers.
+
 Use two explicit roles:
 
 - **Intelligent model:** the model running the current session. It may be Claude or Codex, and may be any suitable model. Use it for judgment, planning, design intent, investigation, review, and validation.
@@ -35,13 +41,15 @@ Do not infer the intelligent model from its provider or model name. “Here” a
 
    Never run two workers in the same worktree. If workers require uncommitted changes from the current worktree, resolve that deliberately before dispatch; `git worktree add` starts from a commit.
 3. **Spec each unit.** Write a task-specific spec in its worker worktree: objective, constraints, owned files or areas, acceptance criteria, the exact test command that must pass, and what not to touch. For frontend work, include design intent: layout, states, interactions, spacing, motion, and reference patterns. For hard problems, specify pseudocode and invariants. Do not include temporary coordination files in the final commit unless they belong in the repository.
-4. **Dispatch to every pinned worker.** Run each eligible unit concurrently using the exact model and effort settings below:
+4. **Dispatch to every pinned worker.** Run each eligible unit concurrently using the exact model and effort settings below. Every dispatch prompt **must** end with the worker directive so the worker never re-enters arbitrage:
 
    ```bash
-   codex exec --cd <worker-worktree> -m gpt-5.6-sol -c 'model_reasoning_effort="high"' "/goal <one-line objective; details in SPEC.md>"
+   codex exec --cd <worker-worktree> -m gpt-5.6-sol -c 'model_reasoning_effort="high"' "/goal <one-line objective; details in SPEC.md>
+
+   You are an isolated worker. Do NOT partition, dispatch, offload, or spawn further workers. The arbitrage skill does not apply to you. Implement the assigned unit directly and stop."
    ```
 
-   Run workers in the background and continue useful planning, investigation, or validation in the intelligent-model session. Do not omit `-m` or the reasoning-effort override, and do not silently fall back to another model.
+   The worker directive is mandatory on **every** dispatch and re-dispatch (including corrective re-dispatches in the review and visual-validation loops). It keeps offloading a one-hop operation: the lead session dispatches, workers only implement. Run workers in the background and continue useful planning, investigation, or validation in the intelligent-model session. Do not omit `-m` or the reasoning-effort override, and do not silently fall back to another model.
 
 ## Review, Integrate, and Clean Up
 
@@ -83,6 +91,7 @@ Struggle must be observed, not predicted. Always dispatch first when implementat
 | “This part is too hard for the worker.” | Predicted struggle is not observed struggle. Specify it precisely and dispatch first. |
 | “I’ll let the worker commit and push.” | Review the diff and run git operations from the intelligent-model session. |
 | “The worker finished, so I can remove its worktree.” | Review, correct, commit, merge, and verify first. Cleanup is the final step. |
+| “This worker could split its unit and dispatch sub-workers.” | Workers never dispatch. Offloading is one hop: lead dispatches, workers implement. Every dispatch carries the worker directive; a session that received it stands down (see Stand-Down Guard). |
 
 ## Common Mistakes
 
