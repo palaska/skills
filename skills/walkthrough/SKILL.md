@@ -58,13 +58,13 @@ Do these in order, every step:
 
 Every reply — steps and detour answers alike — must **end by presenting a selectable menu**, never a prose-only question like "want to go deeper or move on?". In Claude Code this means the reply ends with an **AskUserQuestion call**; there is no text-only alternative when that tool is available.
 
-Offer exactly these options, in this order:
+Present exactly these, in this order:
 
-1. **Ask a question / go deeper** — the user keeps iterating on the current spot in their own words. This is a free-text answer: it comes through AskUserQuestion's built-in "Other" field, which is always present, so this option is always available. In the option list, include an explicit entry (e.g. label "Ask about this step") so the user sees it as choice 1, and treat whatever they type as their question.
-2. **Replay narration** — re-speak the last explanation. Include this option only when audio is enabled.
-3. **Next step** — advance.
+1. **Next step** — advance. Always the first option.
+2. **Replay narration** — re-speak the last explanation. Include this option only when audio is enabled (so with audio off there is just one explicit option).
+3. *(free text — the iteration path)* — the user asks a question or keeps digging in their own words. This is **not** an explicit option: it's AskUserQuestion's built-in "Other" field, which is always present. Do not add a "Ask a question" option — the free-text field already is that. Treat whatever the user types there as their question, and handle it as a detour.
 
-Keep the AskUserQuestion `question` short (e.g. "What next?") and you may name what's coming in the reply text just above it ("Next up: how the retry lands back in the queue"). But the menu itself must always be rendered as selectable options. Outside Claude Code, where no such tool exists, write the three options as a short numbered list instead.
+Keep the AskUserQuestion `question` short (e.g. "What next?") and you may name what's coming in the reply text just above it ("Next up: how the retry lands back in the queue"). But the menu itself must always be rendered as selectable options. Outside Claude Code, where no such tool exists, write the options as a short numbered list and invite a free-text question instead.
 
 ## Hard rules
 
