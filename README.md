@@ -94,6 +94,16 @@ These skills help you write, refactor, and fix code.
   npx skills@latest add palaska/skills/scaffold-exercises
   ```
 
+## Understanding & Review
+
+These skills help you learn a codebase and review changes.
+
+- **walkthrough** — Interactive, step-by-step explainer for existing code, changes, PRs, and concepts. Editor jumps, a live diagram page, and voice narration when available.
+
+  ```
+  npx skills@latest add palaska/skills/walkthrough
+  ```
+
 ## Tooling & Setup
 
 - **setup-pre-commit** — Set up Husky pre-commit hooks with lint-staged, Prettier, type checking, and tests.

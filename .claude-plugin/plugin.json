@@ -1,6 +1,3 @@
 {
-  "name": "palaska-skills",
-  "skills": [
-    "./skills/deprecated/design-an-interface"
-  ]
+  "name": "palaska-skills"
 }
