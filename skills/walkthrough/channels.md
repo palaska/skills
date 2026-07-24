@@ -15,7 +15,7 @@ Jump to the first marked line of the current step's snippet. Skip the jump when 
 
 If a TTS tool was found (`speak`, `say_tts`, `text_to_speech`, `tts`, `converse`, `play_audio`):
 
-- Several tools? A configured `tts_tool` (see [configure.md](configure.md)) wins; if it's missing from the available tools, fall back silently. With no config, prefer quality: `elevenlabs_tts`, then `openai_tts`, then generic `speak`/`text_to_speech`, then `say_tts` last.
+- Several tools? A configured `tts_tool` (see [configure.md](configure.md)) wins; if it's missing from the available tools, fall back silently. With no config, prefer quality: `openai_tts`, then `elevenlabs_tts`, then generic `speak`/`text_to_speech`, then `say_tts` last (robotic — fallback only).
 
 - On by default; "quiet" or "stop talking" turns it off for the rest of the session.
 - Narrate the step's full explanation — the same sentences you write in the terminal, adapted for speech. Saying function names aloud is fine; reading code lines, file paths, or syntax is not.
@@ -26,9 +26,10 @@ If a TTS tool was found (`speak`, `say_tts`, `text_to_speech`, `tts`, `converse`
 
 ## Recommended TTS servers (for humans)
 
-The skill never installs these. If you want narration, add one and restart your session:
+The skill never installs these during a walkthrough (the explicit `/walkthrough configure` flow does walk you through setup — see [configure.md](configure.md)). If you want narration, add one and restart your session:
 
-- **blacktop/mcp-tts** — best fit for narration: plays through speakers, queues utterances so they never overlap, and its `say_tts` tool needs no API key on macOS. `go install github.com/blacktop/mcp-tts@latest`, then register it with your agent.
+- **blacktop/mcp-tts with an OpenAI key — recommended.** Best balance of natural voice, low latency, and cost. Plays through speakers and queues utterances so they never overlap. `go install github.com/blacktop/mcp-tts@latest`, then register with `-e OPENAI_API_KEY=...` to get the `openai_tts` tool.
+- **ElevenLabs official** (elevenlabs-mcp) — highest voice quality. `uvx elevenlabs-mcp` with `ELEVENLABS_API_KEY`. Its file-then-play flow adds a little latency per step.
+- **Kokoro local MCPs** (e.g. scottschram/kokoro-tts-mcp) — offline neural voices, no keys, ~10s first-call warmup then near-instant. Good if you'd rather avoid a paid API.
 - **VoiceMode** (getvoicemode.com) — two-way voice, so you can talk back. `claude plugin install voicemode@voicemode`. OpenAI key, or fully local via Kokoro + whisper.cpp.
-- **Kokoro local MCPs** (e.g. scottschram/kokoro-tts-mcp) — offline neural voices, no keys, ~10s first-call warmup then near-instant.
-- **ElevenLabs official** (elevenlabs-mcp) — best voice quality. `uvx elevenlabs-mcp` with `ELEVENLABS_API_KEY`. Its file-then-play flow adds a little latency per step.
+- **blacktop/mcp-tts with no key** — its `say_tts` tool needs no API key on macOS, but the voice is robotic. Fallback only, not recommended for real use.
