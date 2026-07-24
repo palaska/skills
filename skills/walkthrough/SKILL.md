@@ -71,8 +71,8 @@ Keep the AskUserQuestion `question` short (e.g. "What next?") and you may name w
 - One step per message. Never advance without a user reply.
 - Every reply ends with the selectable input menu (AskUserQuestion in Claude Code) — never a prose-only "shall we move on?". No exceptions.
 - If audio is enabled, every reply is narrated. If the editor is enabled, every step jumps. No silent or code-less steps.
-- A user question is a detour, and detours get the full channel treatment: answer it fully (read other code if needed), narrate the answer, jump the editor if the answer lives in other code, and add an inline visual when one helps. Keep the step counter where it is, then re-offer the menu.
-- "next", "ok", "go on", or just "y" means advance. "replay" or "again" re-speaks. Anything else is a question — treat it as a detour.
+- **A typed question is a detour, and a detour is answered with the exact same channels as a step — no exceptions.** The moment the user types anything that isn't "advance" or "replay", you are giving a detour answer, and that answer MUST: (a) if audio is enabled, be narrated via TTS — never a text-only reply; (b) if the editor is enabled and the answer lives in specific code, jump the editor there before explaining; (c) include an inline visual when one helps; (d) keep the step counter where it is; (e) end with the input menu. A detour that replies in plain text while audio or the editor is on is a bug, not a shortcut. Treat it identically to how you'd treat a step.
+- "next", "ok", "go on", or just "y" means advance. "replay" or "again" re-speaks. Anything else is a question — treat it as a detour, with full channel treatment as above.
 
 ## Configure
 

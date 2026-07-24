@@ -34,7 +34,7 @@ Runs instead of a walkthrough when the skill is invoked with "configure" (`/walk
    Both **Off** and **OpenAI TTS** carry "(recommended)"; **macOS `say`** carries "(not recommended)". Mark next to each whether a matching tool is available right now. Then ask which option they want and, if narration is on, the pace (default 150 wpm, save as `wpm`). Save the resolved tool name as `tts_tool`.
    - **If the chosen option isn't installed yet, give the exact install + configure steps for it** (see "Installing a TTS option" below). Commands are always for the user to run in their own terminal — never ask for an API key in chat.
 4. Verify before saving — never save a selection you haven't checked:
-   - `tts_tool` must be in the available tool list right now. If it isn't, say so and why it's likely missing (the MCP server is registered without the provider's API key, or the session hasn't restarted since re-registering — in Claude Code, `claude mcp get <server>` shows its environment). Offer to save it anyway as the preferred tool: walkthroughs fall back to the next best tool until it appears.
+   - `tts_tool` must be in the available tool list right now. If it isn't, say so and why it's likely missing (the MCP server is registered without the provider's API key, or the agent hasn't restarted since re-registering — inspect it with your host's command: Claude Code `claude mcp get <server>`, Codex `codex mcp list`, Gemini `gemini mcp list`). Offer to save it anyway as the preferred tool: walkthroughs fall back to the next best tool until it appears.
    - If the chosen tool exists, speak one short test sentence at the configured pace and ask if it sounded right.
    - Editor: launchers offered from `command -v` are already verified; if the user typed a different one, `command -v` it first.
 5. Write the file (`mkdir -p ~/.config` first), show the saved JSON.
@@ -44,34 +44,37 @@ Runs instead of a walkthrough when the skill is invoked with "configure" (`/walk
 
 Give only the steps for the option the user picked. All commands run in the user's own terminal, and the session must be restarted afterward for new tools to appear. Never ask for an API key in chat.
 
-**Check prerequisites before recommending any install path — never hand over a command whose toolchain isn't present.** One shell call up front: `command -v go uvx uv brew`. Then:
+OpenAI, ElevenLabs, Google, and macOS `say` all run through the **same server, blacktop/mcp-tts** — you install the binary once, then register it with whichever API key(s) the chosen voice needs. Only Kokoro is a separate install. Getting the binary is the only step that needs a toolchain, and **you do not need Go**. The README documents two install methods — pick by what the user has:
 
-- The blacktop/mcp-tts path needs `go`. If `go` is missing, don't print the `go install` line as-is — first give the user how to get the toolchain: `brew install go` when `brew` exists, otherwise point at https://go.dev/dl. As an alternative that skips Go entirely, point them at the prebuilt binaries on https://github.com/blacktop/mcp-tts/releases (download, `chmod +x`, and use that path in the `claude mcp add` line instead of `$HOME/go/bin/mcp-tts`).
-- The ElevenLabs official server needs `uvx` (from `uv`). If neither `uvx` nor `uv` is present, give the install first: `brew install uv` when `brew` exists, otherwise https://docs.astral.sh/uv/getting-started/installation.
-- Only after the required toolchain is confirmed (or you've told them how to get it) do you print the install + `claude mcp add` commands below. Adapt the binary path to wherever their toolchain actually installs it.
+- **Prebuilt binary — no Go, no toolchain (use this when `go` is missing, since installing Go just for this is annoying).** Download the archive for their OS/arch from https://github.com/blacktop/mcp-tts/releases/latest, unpack it, `chmod +x mcp-tts`, and move it onto their `PATH` (e.g. `mv mcp-tts /usr/local/bin/`). On macOS they may need to clear quarantine: `xattr -d com.apple.quarantine /usr/local/bin/mcp-tts`.
+- **Go** — only if the user already has `go` (`command -v go`): `go install github.com/blacktop/mcp-tts@latest` (lands at `$HOME/go/bin/mcp-tts`).
 
-Per option:
+The README lists no Homebrew or Docker install — don't invent one. If the user asks about a package manager, point them at the releases page above.
 
-- **OpenAI TTS (recommended)** — via blacktop/mcp-tts (needs `go` or a prebuilt binary — see above), which exposes an `openai_tts` tool when registered with a key:
+Once `mcp-tts` is on the `PATH`, register it **with the agent the user is actually running this walkthrough in — you know your own host, so give the matching command, not always the Claude one.** The server can hold several keys at once; include only the one(s) for the chosen voice. Registering exposes the tools `openai_tts`, `elevenlabs_tts`, `google_tts`, and (macOS only) `say_tts`. The examples below use `OPENAI_API_KEY`; swap the env var for the chosen voice (see "Per option"). The server name (`tts` here) is your choice — just keep it consistent, since removing it later uses the same name.
+
+- **Claude Code:** `claude mcp add --scope user tts -e OPENAI_API_KEY=sk-... -- mcp-tts`
+- **OpenAI Codex CLI:** `codex mcp add tts --env OPENAI_API_KEY=sk-... -- mcp-tts` (note `--env`, not `-e`)
+- **Gemini CLI:** `gemini mcp add tts mcp-tts -e OPENAI_API_KEY=sk-...`
+- **Claude Desktop / any other MCP client:** add a server to its `mcpServers` config (Claude Desktop: `~/Library/Application Support/Claude/claude_desktop_config.json`):
+  ```json
+  { "mcpServers": { "tts": { "command": "mcp-tts", "env": { "OPENAI_API_KEY": "sk-..." } } } }
   ```
-  go install github.com/blacktop/mcp-tts@latest
-  claude mcp add --scope user tts -e OPENAI_API_KEY=sk-... -- "$HOME/go/bin/mcp-tts"
-  ```
-  Already have the server registered without a key? Re-register it: `claude mcp remove --scope user tts` then the `add` line above. Then set `tts_tool` to `openai_tts`.
-- **ElevenLabs** — either the official server (needs `uvx` — see above): `uvx elevenlabs-mcp` with `ELEVENLABS_API_KEY`, exposes `text_to_speech`; or the same blacktop `add` line with `-e ELEVENLABS_API_KEY=...` (exposes `elevenlabs_tts`). Set `tts_tool` to match.
-- **Kokoro (local)** — install a Kokoro MCP such as scottschram/kokoro-tts-mcp and register it per its README; no key. Check its prerequisites (usually Python via `uv`/`uvx`) the same way. Set `tts_tool` to the tool it exposes.
-- **macOS native `say`** — blacktop/mcp-tts with no key (needs `go` or a prebuilt binary — see above) gives a `say_tts` tool on macOS:
-  ```
-  go install github.com/blacktop/mcp-tts@latest
-  claude mcp add --scope user tts -- "$HOME/go/bin/mcp-tts"
-  ```
-  Set `tts_tool` to `say_tts`. Fine as a fallback, but expect a robotic voice.
+
+If the binary isn't on the `PATH`, use its absolute path in place of `mcp-tts` (e.g. `"$HOME/go/bin/mcp-tts"`). Already registered without the key you need? Remove it (`claude mcp remove tts`, `codex mcp remove tts`, or edit the JSON) and add it again with the key.
+
+Per option (all commands run in the user's own terminal; restart the agent afterward so the new tools appear; never ask for an API key in chat) — the only thing that changes per voice is the env var:
+
+- **OpenAI TTS (recommended)** — `OPENAI_API_KEY=sk-...`. Set `tts_tool` to `openai_tts`.
+- **ElevenLabs** — `ELEVENLABS_API_KEY=...` (add `ELEVENLABS_VOICE_ID=...` to pick a voice). Set `tts_tool` to `elevenlabs_tts`. (The standalone `uvx elevenlabs-mcp` server is an alternative if they prefer it — needs `uv`/`uvx` — but the blacktop path is simpler since the binary is already installed.)
+- **Kokoro (local)** — a separate server, not blacktop/mcp-tts: install a Kokoro MCP such as scottschram/kokoro-tts-mcp and register it (in the same host, using the host's command above) per its README; no key, usually needs Python via `uv`/`uvx`. Set `tts_tool` to the tool it exposes.
+- **macOS native `say`** — no key at all; register `mcp-tts` with no `env`/`-e` flags. Gives `say_tts` on macOS only. Set `tts_tool` to `say_tts`. Fine as a fallback, but expect a robotic voice.
 
 ## Tips
 
 Print these after saving, so the user gets the most out of walkthroughs:
 
-- **Use a fast, capable model.** A quick model like Sonnet 5 at medium effort keeps the back-and-forth snappy and is plenty smart for walkthroughs — the pacing matters more than raw model power here, and a smoother rhythm makes the experience much better.
+- **Use a fast, capable model.** A quick mid-tier model keeps the back-and-forth snappy and is plenty smart for walkthroughs — the pacing matters more than raw model power here, and a smoother rhythm makes the experience much better. On Claude that's roughly Sonnet 5 at medium effort; on another host, pick its equivalent quick model rather than the heaviest one.
 - **Set up your screen so you can see both surfaces at once.** Arrange your windows so the IDE (where jumps land) and the agent conversation (the step text, diagrams, and narration) are visible side by side — a split layout or a second display. Walkthroughs drive both in sync, and reading the code while you hear the explanation is where it clicks.
 
 ## Detection without config
